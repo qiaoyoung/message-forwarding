@@ -9,9 +9,8 @@
 #import "ViewController.h"
 #import <objc/runtime.h>
 
-#import "MyForwardingTargetClass.h"
-
-#import "MethodCrashClass.h"
+//#import "MyForwardingTargetClass.h"
+//#import "MethodCrashClass.h"
 
 @interface ViewController ()
 
@@ -21,9 +20,7 @@
 
 - (void)viewDidLoad {
     [super viewDidLoad];
-
-
-    //实例化一个button,未实现其方法
+    // 实例化一个button,未实现其方法
     UIButton *button = [UIButton buttonWithType:UIButtonTypeCustom];
     button.frame = CGRectMake(100, 50, 200, 100);
     button.backgroundColor = [UIColor greenColor];
@@ -35,26 +32,22 @@
     
     
 }
-#pragma mark - ---------------------------------------------------------------
-#pragma mark ---- 消息转发机制 第一阶段 ----
-//消息转发机制 第一阶段:动态方法解析
+
+#pragma mark - 消息转发机制 第一阶段
+// 消息转发机制 第一阶段:动态方法解析
 /*
-+ (BOOL)resolveInstanceMethod:(SEL)sel
-{
++ (BOOL)resolveInstanceMethod:(SEL)sel {
     if ([NSStringFromSelector(sel) isEqualToString:@"doSomething"]) {
- 
         class_addMethod([self class], sel, (IMP)dynamicMethodIMP, "v@:");
     }
     return [super resolveInstanceMethod:sel];
 }
 void dynamicMethodIMP(id self, SEL _cmd) {
-    
     NSLog(@"动态添加了方法\"%@\" ,防止程序crash", NSStringFromSelector(_cmd));
-    
 }
-//消息转发机制 第一阶段:备援接收者
-- (id)forwardingTargetForSelector:(SEL)aSelector
-{
+ 
+// 消息转发机制 第一阶段:备援接收者
+- (id)forwardingTargetForSelector:(SEL)aSelector {
     //备援接收者 只需要在.m中实现doSomething就可以防止crash
     if ([NSStringFromSelector(aSelector) isEqualToString:@"doSomething"]) {
         return [MyForwardingTargetClass new];
@@ -63,9 +56,9 @@ void dynamicMethodIMP(id self, SEL _cmd) {
     
 }
 */
-#pragma mark - ---------------------------------------------------------------
-#pragma mark ---- 消息转发机制 第二阶段 ----
-//消息转发机制 第二阶段:完整的消息转发机制
+
+#pragma mark - 消息转发机制 第二阶段
+// 消息转发机制 第二阶段:完整的消息转发机制
 /*
 - (NSMethodSignature *)methodSignatureForSelector:(SEL)aSelector {
     if ([NSStringFromSelector(aSelector) isEqualToString:@"doSomething"]) {
@@ -73,11 +66,9 @@ void dynamicMethodIMP(id self, SEL _cmd) {
     }
     return nil;
 }
-- (void)forwardInvocation:(NSInvocation *)anInvocation
-{
+- (void)forwardInvocation:(NSInvocation *)anInvocation {
     MethodCrashClass *crashClass = [MethodCrashClass new];
     [crashClass methodCrash:anInvocation];
-  
 }
 */
 

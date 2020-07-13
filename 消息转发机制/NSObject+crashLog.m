@@ -12,16 +12,11 @@
 @implementation NSObject (crashLog)
 
 - (NSMethodSignature *)methodSignatureForSelector:(SEL)aSelector {
-
-    //方法签名
+    // 方法签名
     return [NSMethodSignature signatureWithObjCTypes:"v@:@"];
 }
-
-- (void)forwardInvocation:(NSInvocation *)anInvocation
-{
-
+- (void)forwardInvocation:(NSInvocation *)anInvocation {
     NSLog(@"在类:%@中 未实现该方法:%@",NSStringFromClass([anInvocation.target class]),NSStringFromSelector(anInvocation.selector));
-
 }
 
 @end

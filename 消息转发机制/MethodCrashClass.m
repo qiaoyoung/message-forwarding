@@ -10,8 +10,7 @@
 
 @implementation MethodCrashClass
 
-- (void)methodCrash:(NSInvocation *)invocation
-{
+- (void)methodCrash:(NSInvocation *)invocation {
     NSLog(@"在类:%@中 未实现该方法:%@",NSStringFromClass([invocation.target class]),NSStringFromSelector(invocation.selector));
 }
 

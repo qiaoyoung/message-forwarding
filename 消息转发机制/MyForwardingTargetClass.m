@@ -10,9 +10,8 @@
 
 @implementation MyForwardingTargetClass
 
-//不需要在.h中声明，运行时会动态查找类中是否实现该方法
-- (void)doSomething
-{
+// 不需要在.h中声明，运行时会动态查找类中是否实现该方法
+- (void)doSomething {
     NSLog(@"备援接受者的方法调用了,程序没有crash!!!");
 }
 

@@ -19,18 +19,14 @@
 ##### 使用上面方法的前提是：相关方法的实现代码已经写好，只等着运行的时候动态插在类里面就可以了。
 下面还是以上面的button为例，为其实现动态方法解析。
 ```
-+ (BOOL)resolveInstanceMethod:(SEL)sel
-{
++ (BOOL)resolveInstanceMethod:(SEL)sel {
 if ([NSStringFromSelector(sel) isEqualToString:@"doSomething"]) {
-
 class_addMethod([self class], sel, (IMP)dynamicMethodIMP, "v@:");
 }
 return [super resolveInstanceMethod:sel];
 }
 void dynamicMethodIMP(id self, SEL _cmd) {
-
 NSLog(@"动态添加了方法\"%@\" ,防止程序crash", NSStringFromSelector(_cmd));
-
 }
 ```
 控制台打印如下：程序不会crash。
@@ -55,8 +51,7 @@ NSLog(@"动态添加了方法\"%@\" ,防止程序crash", NSStringFromSelector(_c
 @implementation MyForwardingTargetClass
 
 //不需要在.h中声明，运行时会动态查找类中是否实现该方法
-- (void)doSomething
-{
+- (void)doSomething {
 NSLog(@"备援接受者的方法调用了,程序没有crash!!!");
 }
 
@@ -64,17 +59,14 @@ NSLog(@"备援接受者的方法调用了,程序没有crash!!!");
 ```
 在VC中实现备援接收者的处理方法：
 ```
-//消息转发机制 第一阶段:备援接收者
-- (id)forwardingTargetForSelector:(SEL)aSelector
-{
-//备援接收者 只需要在.m中实现doSomething就可以防止crash
+// 消息转发机制 第一阶段:备援接收者
+- (id)forwardingTargetForSelector:(SEL)aSelector {
+// 备援接收者 只需要在.m中实现doSomething就可以防止crash
 if ([NSStringFromSelector(aSelector) isEqualToString:@"doSomething"]) {
 return [MyForwardingTargetClass new];
 }
 return [super forwardingTargetForSelector:aSelector];
-
 }
-
 ```
 控制台打印如下，程序没有crash.
 ![](http://upload-images.jianshu.io/upload_images/3265534-6a8994dd597cc436.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240)
@@ -100,8 +92,7 @@ return [super forwardingTargetForSelector:aSelector];
 #import "MethodCrashClass.h"
 @implementation MethodCrashClass
 
-- (void)methodCrash:(NSInvocation *)invocation
-{
+- (void)methodCrash:(NSInvocation *)invocation {
 NSLog(@"在类:%@中 未实现该方法:%@",NSStringFromClass([invocation.target class]),NSStringFromSelector(invocation.selector));
 }
 
@@ -113,7 +104,7 @@ NSLog(@"在类:%@中 未实现该方法:%@",NSStringFromClass([invocation.target
 ##### 那么问题来了！这些方法是在VC中实现的，如果我们想要给每个类都添加一个防止crash的方法呢？显然这样添加不是一个很好的选择。
 解决方案：
 ```
-//创建NSObject的分类
+// 创建NSObject的分类
 #import <Foundation/Foundation.h>
 @interface NSObject (crashLog)
 
@@ -123,12 +114,10 @@ NSLog(@"在类:%@中 未实现该方法:%@",NSStringFromClass([invocation.target
 @implementation NSObject (crashLog)
 
 - (NSMethodSignature *)methodSignatureForSelector:(SEL)aSelector {
-//方法签名
+// 方法签名
 return [NSMethodSignature signatureWithObjCTypes:"v@:@"];
 }
-
-- (void)forwardInvocation:(NSInvocation *)anInvocation
-{
+- (void)forwardInvocation:(NSInvocation *)anInvocation {
 NSLog(@"在类:%@中 未实现该方法:%@",NSStringFromClass([anInvocation.target class]),NSStringFromSelector(anInvocation.selector));
 }
 
@@ -154,7 +143,7 @@ NSLog(@"在类:%@中 未实现该方法:%@",NSStringFromClass([anInvocation.targ
 
 ##### 可以利用消息转发机制的三个步骤，选择哪一步去改造比较合适呢？
 
-*这里我们选择了第二步`forwardingTargetForSelector`。引用 [《大白健康系统—iOS APP运行时Crash自动修复系统》](http://www.yopai.com/show-3-150721-1.html) 的分析：*
+*这里我们选择了第二步`forwardingTargetForSelector`。引用 [《大白健康系统—iOS APP运行时Crash自动修复系统》](https://neyoufan.github.io/2017/01/13/ios/BayMax_HTSafetyGuard/) 的分析：*
 
 - `resolveInstanceMethod` 需要在类的本身上动态添加它本身不存在的方法，这些方法对于该类本身来说冗余的。
 - `forwardInvocation` 可以通过 NSInvocation 的形式将消息转发给多个对象，但是其开销较大，需要创建新的 NSInvocation 对象，并且 `forwardInvocation` 的函数经常被使用者调用，来做多层消息转发选择机制，不适合多次重写。
