@@ -20,13 +20,13 @@
 下面还是以上面的button为例，为其实现动态方法解析。
 ```
 + (BOOL)resolveInstanceMethod:(SEL)sel {
-if ([NSStringFromSelector(sel) isEqualToString:@"doSomething"]) {
-class_addMethod([self class], sel, (IMP)dynamicMethodIMP, "v@:");
-}
-return [super resolveInstanceMethod:sel];
+    if ([NSStringFromSelector(sel) isEqualToString:@"doSomething"]) {
+        class_addMethod([self class], sel, (IMP)dynamicMethodIMP, "v@:");
+    }
+    return [super resolveInstanceMethod:sel];
 }
 void dynamicMethodIMP(id self, SEL _cmd) {
-NSLog(@"动态添加了方法\"%@\" ,防止程序crash", NSStringFromSelector(_cmd));
+    NSLog(@"动态添加了方法\"%@\" ,防止程序crash", NSStringFromSelector(_cmd));
 }
 ```
 控制台打印如下：程序不会crash。
@@ -50,9 +50,9 @@ NSLog(@"动态添加了方法\"%@\" ,防止程序crash", NSStringFromSelector(_c
 
 @implementation MyForwardingTargetClass
 
-//不需要在.h中声明，运行时会动态查找类中是否实现该方法
+// 不需要在.h中声明，运行时会动态查找类中是否实现该方法
 - (void)doSomething {
-NSLog(@"备援接受者的方法调用了,程序没有crash!!!");
+    NSLog(@"备援接受者的方法调用了,程序没有crash!!!");
 }
 
 @end
@@ -61,11 +61,11 @@ NSLog(@"备援接受者的方法调用了,程序没有crash!!!");
 ```
 // 消息转发机制 第一阶段:备援接收者
 - (id)forwardingTargetForSelector:(SEL)aSelector {
-// 备援接收者 只需要在.m中实现doSomething就可以防止crash
-if ([NSStringFromSelector(aSelector) isEqualToString:@"doSomething"]) {
-return [MyForwardingTargetClass new];
-}
-return [super forwardingTargetForSelector:aSelector];
+    // 备援接收者 只需要在.m中实现doSomething就可以防止crash
+    if ([NSStringFromSelector(aSelector) isEqualToString:@"doSomething"]) {
+        return [MyForwardingTargetClass new];
+    }
+    return [super forwardingTargetForSelector:aSelector];
 }
 ```
 控制台打印如下，程序没有crash.
@@ -93,7 +93,7 @@ return [super forwardingTargetForSelector:aSelector];
 @implementation MethodCrashClass
 
 - (void)methodCrash:(NSInvocation *)invocation {
-NSLog(@"在类:%@中 未实现该方法:%@",NSStringFromClass([invocation.target class]),NSStringFromSelector(invocation.selector));
+    NSLog(@"在类:%@中 未实现该方法:%@",NSStringFromClass([invocation.target class]),NSStringFromSelector(invocation.selector));
 }
 
 @end
@@ -114,11 +114,11 @@ NSLog(@"在类:%@中 未实现该方法:%@",NSStringFromClass([invocation.target
 @implementation NSObject (crashLog)
 
 - (NSMethodSignature *)methodSignatureForSelector:(SEL)aSelector {
-// 方法签名
-return [NSMethodSignature signatureWithObjCTypes:"v@:@"];
+    // 方法签名
+    return [NSMethodSignature signatureWithObjCTypes:"v@:@"];   
 }
 - (void)forwardInvocation:(NSInvocation *)anInvocation {
-NSLog(@"在类:%@中 未实现该方法:%@",NSStringFromClass([anInvocation.target class]),NSStringFromSelector(anInvocation.selector));
+    NSLog(@"在类:%@中 未实现该方法:%@",NSStringFromClass([anInvocation.target class]),NSStringFromSelector(anInvocation.selector));
 }
 
 @end
